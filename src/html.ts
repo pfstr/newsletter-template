@@ -1,4 +1,17 @@
 // Minimal, dependency-free HTML for the two public pages and confirmations.
+import { EXTRA_FIELDS } from "./fields";
+
+const escAttr = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Render developer-defined extra fields (from src/fields.ts) as inputs.
+function fieldInputs(): string {
+  return EXTRA_FIELDS.map((f) => {
+    const ph = escAttr(f.label) + (f.required ? "" : " (optional)");
+    return `<input name="${escAttr(f.name)}" type="${f.type || "text"}" placeholder="${ph}" aria-label="${escAttr(f.label)}"${f.required ? " required" : ""}>`;
+  }).join("\n       ");
+}
+
 const STYLE = `
   :root { color-scheme: light dark; }
   * { box-sizing: border-box; }
@@ -36,18 +49,20 @@ function turnstile(siteKey?: string): string {
 }
 
 // Client-side submit handler shared by the hosted and embedded forms.
+// Collects every named input (email, name, extra fields, Turnstile token).
 const SUBMIT_JS = `document.getElementById('f').addEventListener('submit', async (e) => {
   e.preventDefault();
   const m = document.getElementById('m');
-  const ts = e.target.querySelector('[name="cf-turnstile-response"]');
-  const body = { email: e.target.email.value };
-  if (ts) body['cf-turnstile-response'] = ts.value;
+  const body = {};
+  e.target.querySelectorAll('[name]').forEach((el) => { if (el.name) body[el.name] = el.value; });
   const r = await fetch('/api/subscribe', { method:'POST',
     headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
   m.textContent = r.ok
     ? (j.pending ? "Almost there — check your inbox to confirm." : "Thanks — you're in!")
-    : (j.error === 'failed_captcha' ? "Please complete the verification." : "Please check your email address.");
+    : j.error === 'failed_captcha' ? "Please complete the verification."
+    : j.error === 'missing_field' ? "Please fill in all required fields."
+    : "Please check your email address.";
   if (r.ok && !j.pending) e.target.reset();
 });`;
 
@@ -58,6 +73,8 @@ export function signupPage(turnstileSiteKey?: string): string {
      <p>Get new posts by email. No spam, unsubscribe anytime.</p>
      <form id="f">
        <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+       <input name="name" type="text" placeholder="Your name (optional)" aria-label="Name">
+       ${fieldInputs()}
        ${turnstile(turnstileSiteKey)}
        <button>Subscribe</button>
        <div class="msg" id="m"></div>
@@ -92,6 +109,8 @@ export function embedPage(turnstileSiteKey?: string): string {
 <body>
   <form id="f">
     <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+    <input name="name" type="text" placeholder="Your name (optional)" aria-label="Name">
+    ${fieldInputs()}
     ${turnstile(turnstileSiteKey)}
     <button>Subscribe</button>
     <div class="msg" id="m"></div>
@@ -105,7 +124,7 @@ export function adminPage(): string {
     "Send campaign",
     `<h1>Send a campaign</h1>
      <p>Paste your email HTML, send a test to yourself, then send to everyone.
-        Use <code>{{unsubscribe_url}}</code> in your HTML for the unsubscribe link.</p>
+        Merge tags: <code>{{unsubscribe_url}}</code>, <code>{{email}}</code>, <code>{{name}}</code>.</p>
      <form id="f">
        <label>Admin token</label>
        <input id="token" type="password" placeholder="your ADMIN_TOKEN" required>

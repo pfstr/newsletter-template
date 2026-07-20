@@ -79,6 +79,12 @@ of your page, drop in this snippet — it posts straight to your Worker:
 </form>
 ```
 
+The form asks for an email and an optional name by default. To collect more
+(company, country, …), add entries to [`src/fields.ts`](src/fields.ts) — each one
+automatically appears on the form and is stored as JSON in the `data` column. No
+other file needs changing. In your emails you can personalize with the
+`{{name}}` merge tag.
+
 Already have a list? Import it with
 `npx wrangler d1 execute newsletter-template-db --remote --command "..."`.
 

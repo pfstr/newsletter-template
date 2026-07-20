@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { sendEmail, isEmailConfigured } from "./email";
 import { signupPage, embedPage, adminPage, messagePage } from "./html";
+import { EXTRA_FIELDS } from "./fields";
 
 type Bindings = {
   DB: D1Database;
@@ -70,6 +71,15 @@ app.post("/api/subscribe", async (c) => {
     return c.json({ ok: false, error: "invalid_email" }, 400);
   }
 
+  // Collect any developer-defined extra fields (stored as JSON in `data`).
+  const extra: Record<string, string> = {};
+  for (const f of EXTRA_FIELDS) {
+    const v = String(p[f.name] ?? "").trim().slice(0, 500);
+    if (f.required && !v) return c.json({ ok: false, error: "missing_field", field: f.name }, 400);
+    if (v) extra[f.name] = v;
+  }
+  const dataJson = Object.keys(extra).length ? JSON.stringify(extra) : null;
+
   // Bot protection (only when Turnstile is configured).
   if (c.env.TURNSTILE_SECRET_KEY) {
     const token = String(p["cf-turnstile-response"] ?? p.token ?? "");
@@ -86,14 +96,15 @@ app.post("/api/subscribe", async (c) => {
     }
     // Insert as pending; never downgrade an already-subscribed address.
     const row = await c.env.DB.prepare(
-      `INSERT INTO subscribers (email, name, status, unsub_token, confirm_token)
-       VALUES (?1, ?2, 'pending', ?3, ?4)
+      `INSERT INTO subscribers (email, name, status, unsub_token, confirm_token, data)
+       VALUES (?1, ?2, 'pending', ?3, ?4, ?5)
        ON CONFLICT(email) DO UPDATE SET
          name = COALESCE(excluded.name, subscribers.name),
+         data = COALESCE(excluded.data, subscribers.data),
          status = CASE WHEN subscribers.status = 'subscribed' THEN 'subscribed' ELSE 'pending' END,
          confirm_token = CASE WHEN subscribers.status = 'subscribed' THEN subscribers.confirm_token ELSE excluded.confirm_token END
        RETURNING status, confirm_token`,
-    ).bind(email, name || null, crypto.randomUUID(), crypto.randomUUID())
+    ).bind(email, name || null, crypto.randomUUID(), crypto.randomUUID(), dataJson)
       .first<{ status: string; confirm_token: string | null }>();
 
     // Already subscribed -> nothing to confirm.
@@ -115,12 +126,13 @@ app.post("/api/subscribe", async (c) => {
 
   // Single opt-in: active immediately.
   await c.env.DB.prepare(
-    `INSERT INTO subscribers (email, name, status, unsub_token)
-     VALUES (?1, ?2, 'subscribed', ?3)
+    `INSERT INTO subscribers (email, name, status, unsub_token, data)
+     VALUES (?1, ?2, 'subscribed', ?3, ?4)
      ON CONFLICT(email) DO UPDATE SET
        status = 'subscribed',
-       name = COALESCE(excluded.name, subscribers.name)`,
-  ).bind(email, name || null, crypto.randomUUID()).run();
+       name = COALESCE(excluded.name, subscribers.name),
+       data = COALESCE(excluded.data, subscribers.data)`,
+  ).bind(email, name || null, crypto.randomUUID(), dataJson).run();
   return c.json({ ok: true });
 });
 
@@ -167,8 +179,10 @@ app.post("/api/send", async (c) => {
   if (!subject || !html) return c.json({ ok: false, error: "missing_subject_or_html" }, 400);
 
   const origin = new URL(c.req.url).origin;
-  const render = (h: string, token: string, email: string) =>
-    h.replaceAll("{{unsubscribe_url}}", unsubUrl(origin, token)).replaceAll("{{email}}", email);
+  const render = (h: string, token: string, email: string, name?: string | null) =>
+    h.replaceAll("{{unsubscribe_url}}", unsubUrl(origin, token))
+      .replaceAll("{{email}}", email)
+      .replaceAll("{{name}}", name || "");
 
   // Test send: only to the given address, using a throwaway token.
   if (testEmail) {
@@ -179,8 +193,8 @@ app.post("/api/send", async (c) => {
   }
 
   const { results } = await c.env.DB.prepare(
-    `SELECT email, unsub_token FROM subscribers WHERE status = 'subscribed'`,
-  ).all<{ email: string; unsub_token: string }>();
+    `SELECT email, name, unsub_token FROM subscribers WHERE status = 'subscribed'`,
+  ).all<{ email: string; name: string | null; unsub_token: string }>();
 
   let sent = 0, failed = 0;
   for (const r of results) {
@@ -188,7 +202,7 @@ app.post("/api/send", async (c) => {
       await sendEmail(c.env, {
         to: r.email,
         subject,
-        html: render(html, r.unsub_token, r.email),
+        html: render(html, r.unsub_token, r.email, r.name),
         unsubUrl: unsubUrl(origin, r.unsub_token),
       });
       sent++;

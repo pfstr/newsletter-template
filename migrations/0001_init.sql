@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS subscribers (
   status        TEXT NOT NULL DEFAULT 'subscribed', -- subscribed | pending | unsubscribed
   unsub_token   TEXT NOT NULL,
   confirm_token TEXT,                               -- set while status = 'pending'
+  data          TEXT,                               -- JSON of any extra fields (see src/fields.ts)
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

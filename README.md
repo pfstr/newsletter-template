@@ -51,6 +51,37 @@ the deploy screen, or later under *your Worker → Settings → Variables and Se
   signup form then shows the widget and rejects unverified submissions. Leave
   both blank to disable.
 
+## How it works
+
+Everything runs inside a single Cloudflare Worker. Data flows left to right:
+visitors, you, and your feed on the left; the Worker's endpoints in the middle;
+your D1 database and email provider on the right.
+
+```mermaid
+flowchart LR
+    V[Visitor] -->|signup form / embed / API| SUB[POST /api/subscribe]
+    A[Admin /admin] -->|compose campaign| SEND[POST /api/send]
+    RSS[Your RSS feed] --> SCHED[Scheduled cron job]
+
+    subgraph Worker["Cloudflare Worker"]
+        SUB
+        SEND
+        SCHED
+    end
+
+    SUB -->|Turnstile check, then store| DB[(D1 subscribers)]
+    SUB -.->|double opt-in email| EM[Your email provider]
+    SEND -->|read subscribed list| DB
+    SEND --> EM
+    SCHED -->|new posts only, deduped| DB
+    SCHED --> EM
+    EM --> INBOX[Subscriber inboxes]
+    INBOX -.->|unsubscribe link| DB
+```
+
+Dotted arrows are optional flows: double opt-in (only when `DOUBLE_OPT_IN` is on)
+and the one-click unsubscribe link carried in every email.
+
 ## Collecting subscribers
 
 You don't need to touch any code. Pick whichever fits you:

@@ -2,8 +2,6 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pfstr/newsletter-template)
 
-**Live preview →** [newsletter-template-preview.rafael-pfister.workers.dev](https://newsletter-template-preview.rafael-pfister.workers.dev/)
-
 <img src="docs/screenshot.png" alt="The hosted signup form" width="440">
 
 
@@ -42,6 +40,9 @@ and puts a copy of this repo on your account (with CI — every push redeploys).
 
 That's it — your signup page is immediately live at
 `https://<your-worker>.workers.dev` and starts collecting subscribers right away.
+
+A live demo of this template is available at
+[newsletter-template-preview.rafael-pfister.workers.dev](https://newsletter-template-preview.rafael-pfister.workers.dev/).
 
 ### Options
 

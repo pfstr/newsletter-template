@@ -1,0 +1,21 @@
+{
+  "name": "newsletter-template",
+  "description": "Self-hosted serverless newsletter on Cloudflare — signup, one-click unsubscribe, and send campaigns to your own list. Bring your own email sender.",
+  "private": true,
+  "scripts": {
+    "cf-typegen": "wrangler types",
+    "check": "tsc && wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "predeploy": "wrangler d1 migrations apply DB --remote",
+    "dev": "npm run seedLocalD1 && wrangler dev",
+    "seedLocalD1": "wrangler d1 migrations apply DB --local"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260101.0",
+    "typescript": "5.9.3",
+    "wrangler": "4.88.0"
+  }
+}

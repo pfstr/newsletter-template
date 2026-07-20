@@ -1,0 +1,87 @@
+// Minimal, dependency-free HTML for the two public pages and confirmations.
+const STYLE = `
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background: #f6f7f9; color: #1a1a1a; padding: 24px; }
+  @media (prefers-color-scheme: dark) { body { background: #111; color: #eee; } .card { background: #1b1b1b !important; } }
+  .card { width: 100%; max-width: 480px; background: #fff; border-radius: 14px; padding: 28px; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p { color: #666; font-size: 14px; line-height: 1.5; margin: 0 0 18px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  input, textarea { width: 100%; padding: 10px 12px; font: inherit; font-size: 14px;
+    border: 1px solid #ccc; border-radius: 10px; background: #fff; color: #111; }
+  textarea { min-height: 220px; font-family: ui-monospace, monospace; }
+  button { margin-top: 16px; padding: 11px 18px; font-size: 14px; font-weight: 600;
+    border: 0; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; }
+  button.secondary { background: #e6e6e6; color: #111; }
+  .msg { margin-top: 14px; font-size: 14px; font-weight: 600; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+`;
+
+function shell(title: string, inner: string, script = ""): string {
+  return `<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>${title}</title><style>${STYLE}</style></head>
+<body><main class="card">${inner}</main>${script ? `<script>${script}</script>` : ""}</body></html>`;
+}
+
+export function signupPage(): string {
+  return shell(
+    "Subscribe",
+    `<h1>Subscribe to the newsletter</h1>
+     <p>Get new posts by email. No spam, unsubscribe anytime.</p>
+     <form id="f">
+       <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+       <button>Subscribe</button>
+       <div class="msg" id="m"></div>
+     </form>`,
+    `document.getElementById('f').addEventListener('submit', async (e) => {
+       e.preventDefault();
+       const email = e.target.email.value;
+       const r = await fetch('/api/subscribe', { method:'POST',
+         headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+       document.getElementById('m').textContent = r.ok ? "Thanks — you're in!" : "Please check your email address.";
+       if (r.ok) e.target.reset();
+     });`,
+  );
+}
+
+export function adminPage(): string {
+  return shell(
+    "Send campaign",
+    `<h1>Send a campaign</h1>
+     <p>Paste your email HTML, send a test to yourself, then send to everyone.
+        Use <code>{{unsubscribe_url}}</code> in your HTML for the unsubscribe link.</p>
+     <form id="f">
+       <label>Admin token</label>
+       <input id="token" type="password" placeholder="your ADMIN_TOKEN" required>
+       <label>Subject</label>
+       <input id="subject" type="text" placeholder="This week's newsletter" required>
+       <label>HTML</label>
+       <textarea id="html" placeholder="<h1>Hello</h1> ... &lt;a href='{{unsubscribe_url}}'&gt;Unsubscribe&lt;/a&gt;"></textarea>
+       <label>Test address</label>
+       <input id="test" type="email" placeholder="you@example.com">
+       <div class="row">
+         <button type="button" class="secondary" onclick="send(true)">Send test</button>
+         <button type="button" onclick="send(false)">Send to all</button>
+       </div>
+       <div class="msg" id="m"></div>
+     </form>`,
+    `async function send(test) {
+       const m = document.getElementById('m'); m.textContent = 'Sending…';
+       const body = { subject: subject.value, html: html.value };
+       if (test) body.testEmail = document.getElementById('test').value;
+       const r = await fetch('/api/send', { method:'POST',
+         headers:{'Content-Type':'application/json','x-admin-token': token.value}, body: JSON.stringify(body) });
+       const j = await r.json().catch(()=>({}));
+       m.textContent = !r.ok ? ('Error: ' + (j.error || r.status))
+         : test ? 'Test sent.' : ('Done — sent ' + j.sent + ', failed ' + j.failed + '.');
+     }`,
+  );
+}
+
+export function messagePage(title: string, body: string): string {
+  return shell(title, `<h1>${title}</h1><p>${body} <a href="/">Home</a></p>`);
+}

@@ -1,0 +1,18 @@
+{
+  "name": "newsletter-template",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-08",
+  "upload_source_maps": true,
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "newsletter-template-db",
+      "database_id": "REPLACED_ON_DEPLOY"
+    }
+  ],
+  "vars": {
+    "FROM_NAME": "My Newsletter",
+    "FROM_EMAIL": "newsletter@example.com"
+  }
+}

@@ -148,4 +148,5 @@ npm run dev                      # applies the schema to a local D1, then starts
 
 ## License
 
-[CC BY-NC-SA 4.0](LICENSE.md) — © Rafael Pfister, [rafaelpfister.ch](https://rafaelpfister.ch).
+[MIT](LICENSE) — © Rafael Pfister, [rafaelpfister.ch](https://rafaelpfister.ch). Free to
+use, modify and sell; the copyright notice (name + link) must be kept in copies.

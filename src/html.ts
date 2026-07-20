@@ -27,30 +27,48 @@ function shell(title: string, inner: string, script = ""): string {
 <body><main class="card">${inner}</main>${script ? `<script>${script}</script>` : ""}</body></html>`;
 }
 
-export function signupPage(): string {
+// Turnstile widget markup + loader, rendered only when a site key is set.
+function turnstile(siteKey?: string): string {
+  return siteKey
+    ? `<div class="cf-turnstile" data-sitekey="${siteKey}" style="margin-top:14px"></div>
+       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>`
+    : "";
+}
+
+// Client-side submit handler shared by the hosted and embedded forms.
+const SUBMIT_JS = `document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const m = document.getElementById('m');
+  const ts = e.target.querySelector('[name="cf-turnstile-response"]');
+  const body = { email: e.target.email.value };
+  if (ts) body['cf-turnstile-response'] = ts.value;
+  const r = await fetch('/api/subscribe', { method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  m.textContent = r.ok
+    ? (j.pending ? "Almost there — check your inbox to confirm." : "Thanks — you're in!")
+    : (j.error === 'failed_captcha' ? "Please complete the verification." : "Please check your email address.");
+  if (r.ok && !j.pending) e.target.reset();
+});`;
+
+export function signupPage(turnstileSiteKey?: string): string {
   return shell(
     "Subscribe",
     `<h1>Subscribe to the newsletter</h1>
      <p>Get new posts by email. No spam, unsubscribe anytime.</p>
      <form id="f">
        <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+       ${turnstile(turnstileSiteKey)}
        <button>Subscribe</button>
        <div class="msg" id="m"></div>
      </form>`,
-    `document.getElementById('f').addEventListener('submit', async (e) => {
-       e.preventDefault();
-       const email = e.target.email.value;
-       const r = await fetch('/api/subscribe', { method:'POST',
-         headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
-       document.getElementById('m').textContent = r.ok ? "Thanks — you're in!" : "Please check your email address.";
-       if (r.ok) e.target.reset();
-     });`,
+    SUBMIT_JS,
   );
 }
 
 // Transparent, chrome-free form for embedding on the user's own site
 // (via <iframe src="/embed"> or the /embed page). Posts to the same origin.
-export function embedPage(): string {
+export function embedPage(turnstileSiteKey?: string): string {
   return `<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Subscribe</title>
@@ -64,6 +82,7 @@ export function embedPage(): string {
     border: 1px solid #ccc; border-radius: 10px; background: #fff; color: #111; }
   button { padding: 10px 16px; font: inherit; font-size: 14px; font-weight: 600;
     border: 0; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; }
+  .cf-turnstile { flex-basis: 100%; }
   .msg { flex-basis: 100%; font-size: 13px; color: #555; min-height: 1em; }
   @media (prefers-color-scheme: dark) {
     input { background: #1b1b1b; color: #eee; border-color: #444; }
@@ -73,20 +92,11 @@ export function embedPage(): string {
 <body>
   <form id="f">
     <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+    ${turnstile(turnstileSiteKey)}
     <button>Subscribe</button>
     <div class="msg" id="m"></div>
   </form>
-  <script>
-    document.getElementById('f').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const r = await fetch('/api/subscribe', { method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: e.target.email.value }) });
-      document.getElementById('m').textContent =
-        r.ok ? "Thanks — you're in!" : "Please check your email address.";
-      if (r.ok) e.target.reset();
-    });
-  </script>
+  <script>${SUBMIT_JS}</script>
 </body></html>`;
 }
 

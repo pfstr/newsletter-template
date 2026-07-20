@@ -13,6 +13,8 @@
   ],
   "vars": {
     "FROM_NAME": "My Newsletter",
-    "FROM_EMAIL": "newsletter@example.com"
+    "FROM_EMAIL": "newsletter@example.com",
+    "DOUBLE_OPT_IN": "false",
+    "TURNSTILE_SITE_KEY": ""
   }
 }

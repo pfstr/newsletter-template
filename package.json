@@ -22,6 +22,15 @@
       },
       "FROM_EMAIL": {
         "description": "The address your emails are sent from, once you connect an email provider in src/email.ts."
+      },
+      "DOUBLE_OPT_IN": {
+        "description": "Set to \"true\" to require subscribers to confirm via a link before they're added (needs email configured). Default \"false\" (single opt-in)."
+      },
+      "TURNSTILE_SITE_KEY": {
+        "description": "Optional. Public Cloudflare Turnstile site key for bot protection on the signup form. Leave blank to disable. Pair with the TURNSTILE_SECRET_KEY secret."
+      },
+      "TURNSTILE_SECRET_KEY": {
+        "description": "Optional. Cloudflare Turnstile secret key (verifies signups server-side). Leave blank to disable."
       }
     }
   },

@@ -31,6 +31,20 @@ and puts a copy of this repo on your account (with CI — every push redeploys).
 That's it — your signup page is immediately live at
 `https://<your-worker>.workers.dev` and starts collecting subscribers right away.
 
+### Options
+
+Both are off by default, so nothing extra is needed to get started. Set them in
+the deploy screen, or later under *your Worker → Settings → Variables and Secrets*:
+
+- **Double opt-in** — set `DOUBLE_OPT_IN` to `"true"` to require new subscribers
+  to click a confirmation link before they're added (recommended for CH/EU;
+  requires email to be configured, see below). Default is single opt-in.
+- **Bot protection ([Turnstile](https://developers.cloudflare.com/turnstile/))** —
+  create a Turnstile widget in your Cloudflare dashboard, then set the public
+  `TURNSTILE_SITE_KEY` (variable) **and** `TURNSTILE_SECRET_KEY` (secret). The
+  signup form then shows the widget and rejects unverified submissions. Leave
+  both blank to disable.
+
 ## Collecting subscribers
 
 You don't need to touch any code. Pick whichever fits you:
@@ -98,8 +112,9 @@ npm run dev                      # applies the schema to a local D1, then starts
 
 ## Notes & limits (honest)
 
-- **Single opt-in by default** — simplest to start. For CH/EU compliance consider
-  double opt-in (a confirmation email before `status = 'subscribed'`).
+- **Single opt-in by default** — simplest to start. Flip `DOUBLE_OPT_IN` to
+  `"true"` for a confirmation-email step (recommended for CH/EU); it needs your
+  email provider wired up so the confirmation link can be sent.
 - **Sending is a simple loop** — great for up to a few hundred recipients per send
   (Cloudflare Workers subrequest limits). For larger lists, batch the send via
   [Cloudflare Queues](https://developers.cloudflare.com/queues/).

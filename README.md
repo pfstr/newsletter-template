@@ -2,6 +2,8 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pfstr/newsletter-template)
 
+**Live preview →** [newsletter-template-preview.rafael-pfister.workers.dev](https://newsletter-template-preview.rafael-pfister.workers.dev/)
+
 <img src="docs/screenshot.png" alt="The hosted signup form" width="440">
 
 

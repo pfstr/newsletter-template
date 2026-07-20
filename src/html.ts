@@ -31,6 +31,12 @@ const STYLE = `
   button.secondary { background: #e6e6e6; color: #111; }
   .msg { margin-top: 14px; font-size: 14px; font-weight: 600; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  input:focus, textarea:focus { outline: none; border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.10); }
+  /* Evenly spaced vertical form (signup) */
+  form.stack { display: flex; flex-direction: column; gap: 12px; }
+  form.stack button { margin-top: 4px; }
+  form.stack .msg { margin-top: 0; }
 `;
 
 function shell(title: string, inner: string, script = ""): string {
@@ -71,9 +77,9 @@ export function signupPage(turnstileSiteKey?: string): string {
     "Subscribe",
     `<h1>Subscribe to the newsletter</h1>
      <p>Get new posts by email. No spam, unsubscribe anytime.</p>
-     <form id="f">
-       <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+     <form id="f" class="stack">
        <input name="name" type="text" placeholder="Your name (optional)" aria-label="Name">
+       <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
        ${fieldInputs()}
        ${turnstile(turnstileSiteKey)}
        <button>Subscribe</button>
@@ -94,22 +100,24 @@ export function embedPage(turnstileSiteKey?: string): string {
   * { box-sizing: border-box; }
   body { margin: 0; background: transparent;
     font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-  form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   input { flex: 1 1 180px; padding: 10px 12px; font: inherit; font-size: 14px;
     border: 1px solid #ccc; border-radius: 10px; background: #fff; color: #111; }
+  input:focus { outline: none; border-color: #1a1a1a; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08); }
   button { padding: 10px 16px; font: inherit; font-size: 14px; font-weight: 600;
     border: 0; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; }
   .cf-turnstile { flex-basis: 100%; }
   .msg { flex-basis: 100%; font-size: 13px; color: #555; min-height: 1em; }
   @media (prefers-color-scheme: dark) {
     input { background: #1b1b1b; color: #eee; border-color: #444; }
+    input:focus { border-color: #eee; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15); }
     button { background: #eee; color: #111; } .msg { color: #aaa; }
   }
 </style></head>
 <body>
   <form id="f">
-    <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
     <input name="name" type="text" placeholder="Your name (optional)" aria-label="Name">
+    <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
     ${fieldInputs()}
     ${turnstile(turnstileSiteKey)}
     <button>Subscribe</button>

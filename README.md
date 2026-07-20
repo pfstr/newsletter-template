@@ -2,7 +2,8 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pfstr/newsletter-template)
 
-![The hosted signup form](docs/screenshot.png)
+<img src="docs/screenshot.png" alt="The hosted signup form" width="440">
+
 
 <!-- dash-content-start -->
 

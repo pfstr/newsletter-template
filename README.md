@@ -188,7 +188,7 @@ npm run dev                      # applies the schema to a local D1, then starts
 ## Notes & limits
 
 - **Single opt-in by default** — simplest to start. Flip `DOUBLE_OPT_IN` to
-  `"true"` for a confirmation-email step (recommended for CH/EU); it needs your
+  `"true"` for a confirmation-email step; it needs your
   email provider wired up so the confirmation link can be sent.
 - **Sending is a simple loop** — great for up to a few hundred recipients per send
   (Cloudflare Workers subrequest limits). For larger lists, batch the send via

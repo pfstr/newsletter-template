@@ -2,6 +2,10 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pfstr/newsletter-template)
 
+![The hosted signup form](docs/screenshot.png)
+
+<!-- dash-content-start -->
+
 A complete, self-hosted newsletter on your own Cloudflare account: a signup
 form, one-click unsubscribe, and a simple page to send an email campaign to
 your subscribers. **You own the data** (Cloudflare D1) and **bring your own
@@ -16,6 +20,8 @@ Workers + D1 and stays comfortably inside the free tier for small and medium lis
 - **One-click unsubscribe** — RFC 8058 compliant, with a per-subscriber token
 - **Send** — a `/admin` page: paste a subject + HTML, send a test to yourself, then send to everyone
 - **Your data** — subscribers live in a D1 database on *your* account, exportable any time
+
+<!-- dash-content-end -->
 
 ## Getting started
 

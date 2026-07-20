@@ -9,11 +9,16 @@
     "deploy": "wrangler deploy",
     "predeploy": "wrangler d1 migrations apply DB --remote",
     "dev": "npm run seedLocalD1 && wrangler dev",
-    "seedLocalD1": "wrangler d1 migrations apply DB --local"
+    "seedLocalD1": "wrangler d1 migrations apply DB --local",
+    "test:e2e": "playwright test",
+    "test:e2e:codegen": "playwright codegen http://localhost:8787"
   },
   "cloudflare": {
     "label": "Newsletter",
-    "products": ["Workers", "D1"],
+    "products": [
+      "Workers",
+      "D1"
+    ],
     "bindings": {
       "ADMIN_TOKEN": {
         "description": "Password that protects your send page (/admin). Use a long, random string."
@@ -49,6 +54,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260101.0",
+    "@playwright/test": "^1.61.1",
     "typescript": "5.9.3",
     "wrangler": "4.88.0"
   }

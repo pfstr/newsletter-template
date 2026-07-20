@@ -40,8 +40,8 @@ That's it — your signup page is immediately live at
 
 ### Options
 
-Both are off by default, so nothing extra is needed to get started. Set them in
-the deploy screen, or later under *your Worker → Settings → Variables and Secrets*:
+Both are off by default. Add them any time in the dashboard under *your Worker →
+Settings → Variables and Secrets* (double opt-in can also be set on the deploy screen):
 
 - **Double opt-in** — set `DOUBLE_OPT_IN` to `"true"` to require new subscribers
   to click a confirmation link before they're added (recommended for CH/EU;
@@ -164,7 +164,7 @@ write your email, send a test to yourself, and send to your list. Use
 
 Instead of composing each issue by hand, the Worker can watch your blog's feed
 and email subscribers automatically whenever you publish. It's off by default.
-To turn it on, set:
+To turn it on, add these in the dashboard under *Settings → Variables and Secrets*:
 
 - **`RSS_AUTOSEND`** → `"true"`
 - **`RSS_FEED_URL`** → your RSS or Atom feed (e.g. `https://example.com/rss.xml`)

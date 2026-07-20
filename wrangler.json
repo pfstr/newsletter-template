@@ -17,10 +17,6 @@
   "vars": {
     "FROM_NAME": "My Newsletter",
     "FROM_EMAIL": "newsletter@example.com",
-    "DOUBLE_OPT_IN": "false",
-    "TURNSTILE_SITE_KEY": "",
-    "RSS_AUTOSEND": "false",
-    "RSS_FEED_URL": "",
-    "PUBLIC_URL": ""
+    "DOUBLE_OPT_IN": "false"
   }
 }

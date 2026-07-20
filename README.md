@@ -41,9 +41,6 @@ and puts a copy of this repo on your account (with CI — every push redeploys).
 That's it — your signup page is immediately live at
 `https://<your-worker>.workers.dev` and starts collecting subscribers right away.
 
-A live demo of this template is available at
-[newsletter-template-preview.rafael-pfister.workers.dev](https://newsletter-template-preview.rafael-pfister.workers.dev/).
-
 ### Options
 
 Both are off by default. Add them any time in the dashboard under *your Worker →

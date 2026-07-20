@@ -10,6 +10,21 @@
     "dev": "npm run seedLocalD1 && wrangler dev",
     "seedLocalD1": "wrangler d1 migrations apply DB --local"
   },
+  "cloudflare": {
+    "label": "Newsletter",
+    "products": ["Workers", "D1"],
+    "bindings": {
+      "ADMIN_TOKEN": {
+        "description": "Password that protects your send page (/admin). Use a long, random string."
+      },
+      "FROM_NAME": {
+        "description": "The name your emails are sent from, e.g. \"Jane's Newsletter\"."
+      },
+      "FROM_EMAIL": {
+        "description": "The address your emails are sent from, once you connect an email provider in src/email.ts."
+      }
+    }
+  },
   "dependencies": {
     "hono": "^4.6.14"
   },

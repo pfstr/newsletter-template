@@ -1,10 +1,10 @@
 import { Hono } from "hono";
-import { sendEmail } from "./email";
-import { signupPage, adminPage, messagePage } from "./html";
+import { cors } from "hono/cors";
+import { sendEmail, isEmailConfigured } from "./email";
+import { signupPage, embedPage, adminPage, messagePage } from "./html";
 
 type Bindings = {
   DB: D1Database;
-  RESEND_API_KEY?: string;
   ADMIN_TOKEN?: string;
   FROM_NAME?: string;
   FROM_EMAIL?: string;
@@ -27,6 +27,12 @@ async function readParams(c: any): Promise<Record<string, string>> {
 
 // --- Public: hosted signup form ---
 app.get("/", (c) => c.html(signupPage()));
+
+// --- Public: bare form for iframe/script embedding on your own site ---
+app.get("/embed", (c) => c.html(embedPage()));
+
+// Allow the subscribe endpoint to be called from your own website's domain.
+app.use("/api/subscribe", cors());
 
 // --- Public: subscribe (single opt-in) ---
 app.post("/api/subscribe", async (c) => {
@@ -65,6 +71,11 @@ app.get("/admin", (c) => c.html(adminPage()));
 app.post("/api/send", async (c) => {
   if (!c.env.ADMIN_TOKEN || c.req.header("x-admin-token") !== c.env.ADMIN_TOKEN) {
     return c.json({ ok: false, error: "unauthorized" }, 401);
+  }
+  // Signups work with zero config; sending needs your own email provider wired
+  // up in src/email.ts. Fail clearly until then.
+  if (!isEmailConfigured(c.env)) {
+    return c.json({ ok: false, error: "email_not_configured" }, 400);
   }
   const { subject, html, testEmail } = await c.req.json<{
     subject?: string; html?: string; testEmail?: string;

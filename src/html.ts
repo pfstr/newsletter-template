@@ -48,6 +48,48 @@ export function signupPage(): string {
   );
 }
 
+// Transparent, chrome-free form for embedding on the user's own site
+// (via <iframe src="/embed"> or the /embed page). Posts to the same origin.
+export function embedPage(): string {
+  return `<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Subscribe</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: transparent;
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input { flex: 1 1 180px; padding: 10px 12px; font: inherit; font-size: 14px;
+    border: 1px solid #ccc; border-radius: 10px; background: #fff; color: #111; }
+  button { padding: 10px 16px; font: inherit; font-size: 14px; font-weight: 600;
+    border: 0; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; }
+  .msg { flex-basis: 100%; font-size: 13px; color: #555; min-height: 1em; }
+  @media (prefers-color-scheme: dark) {
+    input { background: #1b1b1b; color: #eee; border-color: #444; }
+    button { background: #eee; color: #111; } .msg { color: #aaa; }
+  }
+</style></head>
+<body>
+  <form id="f">
+    <input name="email" type="email" placeholder="you@example.com" required aria-label="Email">
+    <button>Subscribe</button>
+    <div class="msg" id="m"></div>
+  </form>
+  <script>
+    document.getElementById('f').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const r = await fetch('/api/subscribe', { method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: e.target.email.value }) });
+      document.getElementById('m').textContent =
+        r.ok ? "Thanks — you're in!" : "Please check your email address.";
+      if (r.ok) e.target.reset();
+    });
+  </script>
+</body></html>`;
+}
+
 export function adminPage(): string {
   return shell(
     "Send campaign",

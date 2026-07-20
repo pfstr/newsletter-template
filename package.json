@@ -2,6 +2,7 @@
   "name": "newsletter-template",
   "description": "Self-hosted serverless newsletter on Cloudflare — signup, one-click unsubscribe, and send campaigns to your own list. Bring your own email sender.",
   "private": true,
+  "license": "CC-BY-NC-SA-4.0",
   "scripts": {
     "cf-typegen": "wrangler types",
     "check": "tsc && wrangler deploy --dry-run",

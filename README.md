@@ -134,7 +134,7 @@ cp .dev.vars.example .dev.vars   # fill in your values
 npm run dev                      # applies the schema to a local D1, then starts Wrangler
 ```
 
-## Notes & limits (honest)
+## Notes & limits
 
 - **Single opt-in by default** — simplest to start. Flip `DOUBLE_OPT_IN` to
   `"true"` for a confirmation-email step (recommended for CH/EU); it needs your
@@ -148,4 +148,4 @@ npm run dev                      # applies the schema to a local D1, then starts
 
 ## License
 
-MIT
+[CC BY-NC-SA 4.0](LICENSE.md) — © Rafael Pfister, [rafaelpfister.ch](https://rafaelpfister.ch).

@@ -108,6 +108,24 @@ Then open `https://<your-worker>.workers.dev/admin`, paste your `ADMIN_TOKEN`,
 write your email, send a test to yourself, and send to your list. Use
 `{{unsubscribe_url}}` anywhere in your HTML for the one-click unsubscribe link.
 
+## Automatic sending from your blog (RSS)
+
+Instead of composing each issue by hand, the Worker can watch your blog's feed
+and email subscribers automatically whenever you publish. It's off by default.
+To turn it on, set:
+
+- **`RSS_AUTOSEND`** → `"true"`
+- **`RSS_FEED_URL`** → your RSS or Atom feed (e.g. `https://example.com/rss.xml`)
+- **`PUBLIC_URL`** → your Worker's URL (e.g. `https://your-worker.workers.dev`),
+  so unsubscribe links in the sent emails are absolute
+- and your email provider configured (see above)
+
+A scheduled job (every 15 minutes by default — adjust the cron in
+`wrangler.json`) checks the feed and sends any new post to your subscribed list,
+newest posts in order. Two safeguards are built in: each post is emailed only
+once, and the **first run just records your current feed as a baseline** — it
+never blasts your back catalogue. Only posts published after you enable it go out.
+
 ## Local development
 
 ```

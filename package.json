@@ -31,6 +31,15 @@
       },
       "TURNSTILE_SECRET_KEY": {
         "description": "Optional. Cloudflare Turnstile secret key (verifies signups server-side). Leave blank to disable."
+      },
+      "RSS_AUTOSEND": {
+        "description": "Optional. Set to \"true\" to automatically email subscribers when a new post appears in your RSS feed. Needs RSS_FEED_URL, PUBLIC_URL and email configured. Default \"false\"."
+      },
+      "RSS_FEED_URL": {
+        "description": "Optional. Your blog's RSS or Atom feed URL, checked on a schedule for new posts (used with RSS_AUTOSEND)."
+      },
+      "PUBLIC_URL": {
+        "description": "Optional. Your Worker's public URL (e.g. https://your-worker.workers.dev). Required for RSS auto-send so unsubscribe links in scheduled emails are absolute."
       }
     }
   },

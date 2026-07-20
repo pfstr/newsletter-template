@@ -21,3 +21,9 @@ CREATE TABLE IF NOT EXISTS campaigns (
   fail_count INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Feed items already auto-sent, so RSS auto-send never emails the same post twice.
+CREATE TABLE IF NOT EXISTS sent_posts (
+  item_id TEXT PRIMARY KEY,
+  sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

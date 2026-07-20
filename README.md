@@ -53,34 +53,48 @@ the deploy screen, or later under *your Worker → Settings → Variables and Se
 
 ## How it works
 
-Everything runs inside a single Cloudflare Worker. Data flows left to right:
-visitors, you, and your feed on the left; the Worker's endpoints in the middle;
-your D1 database and email provider on the right.
+Everything runs inside a single Cloudflare Worker. The sequence below traces the
+main data flows between the participants — laid out left to right: the visitor,
+you as admin, the Worker, your D1 database and your email provider.
 
 ```mermaid
-flowchart LR
-    V[Visitor] -->|signup form / embed / API| SUB[POST /api/subscribe]
-    A[Admin /admin] -->|compose campaign| SEND[POST /api/send]
-    RSS[Your RSS feed] --> SCHED[Scheduled cron job]
+sequenceDiagram
+    participant V as Visitor
+    participant A as Admin
+    participant W as Cloudflare Worker
+    participant DB as D1 Database
+    participant EM as Email Provider
 
-    subgraph Worker["Cloudflare Worker"]
-        SUB
-        SEND
-        SCHED
+    Note over V,W: Sign up
+    V->>W: Subscribe (email + name)
+    W->>W: Verify Turnstile (if enabled)
+    W->>DB: Store subscriber
+    W-->>V: You're in!
+    opt Double opt-in
+        W->>EM: Confirmation email
+        V->>W: Click confirm link
+        W->>DB: Mark subscribed
     end
 
-    SUB -->|Turnstile check, then store| DB[(D1 subscribers)]
-    SUB -.->|double opt-in email| EM[Your email provider]
-    SEND -->|read subscribed list| DB
-    SEND --> EM
-    SCHED -->|new posts only, deduped| DB
-    SCHED --> EM
-    EM --> INBOX[Subscriber inboxes]
-    INBOX -.->|unsubscribe link| DB
+    Note over A,EM: Send a campaign
+    A->>W: Compose and send (/admin)
+    W->>DB: Read subscribed list
+    W->>EM: Deliver campaign
+    W->>DB: Log campaign
+
+    Note over W,EM: Auto-send from RSS (cron)
+    W->>W: Scheduled trigger (every 15 min)
+    W->>DB: Check already-sent posts
+    W->>EM: Email new posts only
+    W->>DB: Mark posts sent
+
+    Note over V,EM: Unsubscribe
+    EM->>V: Email with unsubscribe link
+    V->>W: Click unsubscribe
+    W->>DB: Mark unsubscribed
 ```
 
-Dotted arrows are optional flows: double opt-in (only when `DOUBLE_OPT_IN` is on)
-and the one-click unsubscribe link carried in every email.
+Turnstile and double opt-in are optional; RSS auto-send runs only when you enable it.
 
 ## Collecting subscribers
 

@@ -21,6 +21,9 @@ Workers + D1 and stays comfortably inside the free tier for small and medium lis
 - **One-click unsubscribe** — RFC 8058 compliant, with a per-subscriber token
 - **Send** — a `/admin` page: paste a subject + HTML, send a test to yourself, then send to everyone
 - **Your data** — subscribers live in a D1 database on *your* account, exportable any time
+- **Double opt-in** *(optional)* — a confirmation-email step before a subscriber is added
+- **Bot protection** *(optional)* — Cloudflare Turnstile on the signup form
+- **Automatic RSS sending** *(optional)* — email new blog posts to your list on a schedule
 
 <!-- dash-content-end -->
 

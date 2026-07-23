@@ -7,6 +7,22 @@ All notable changes to this template are documented here. The format follows
 Updating a deployed copy: see the [Updating](README.md#updating) section in
 the README.
 
+## [1.2.0] - 2026-07-23
+
+### Added
+
+- Localizable email texts: `FOOTER_TEXT` and `UNSUBSCRIBE_LABEL` override the
+  compliance footer's default English wording; `CONFIRM_SUBJECT` and
+  `CONFIRM_HTML` (with a `{{confirm_url}}` merge tag) replace the
+  double-opt-in confirmation email.
+
+### Fixed
+
+- Outgoing emails are wrapped in a minimal HTML document with an explicit
+  UTF-8 charset, so mail clients no longer garble umlauts and other non-ASCII
+  characters. Emails that already contain a full `<html>` document are left
+  untouched.
+
 ## [1.1.0] - 2026-07-23
 
 Queued background sending — any list size on any plan.

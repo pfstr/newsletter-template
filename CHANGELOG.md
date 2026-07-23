@@ -7,6 +7,16 @@ All notable changes to this template are documented here. The format follows
 Updating a deployed copy: see the [Updating](README.md#updating) section in
 the README.
 
+## [1.2.1] - 2026-07-23
+
+### Fixed
+
+- A failing `sendEmailBatch()` no longer sinks the whole delivery run: the
+  queue drain falls back to per-email `sendEmail()` within the same run, and
+  delivery errors are logged (visible in `wrangler tail`) instead of being
+  swallowed silently. Previously a broken batch adapter burned all three
+  retry attempts without delivering a single email.
+
 ## [1.2.0] - 2026-07-23
 
 ### Added

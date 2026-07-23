@@ -1,6 +1,6 @@
 {
   "name": "newsletter-template",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Serverless newsletter on your own Cloudflare account — signup, compliant one-click unsubscribe, and campaigns to your own list. Bring your own email sender.",
   "private": true,
   "license": "MIT",

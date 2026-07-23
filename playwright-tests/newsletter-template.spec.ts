@@ -22,3 +22,8 @@ test("admin page is served", async ({ page }) => {
   await page.goto("/admin");
   await expect(page.locator("h1")).toContainText("Send");
 });
+
+test("unsubscribe link shows a confirmation step", async ({ page }) => {
+  await page.goto("/unsubscribe?t=some-token");
+  await expect(page.getByRole("button", { name: "Unsubscribe" })).toBeVisible();
+});

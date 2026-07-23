@@ -7,6 +7,35 @@ All notable changes to this template are documented here. The format follows
 Updating a deployed copy: see the [Updating](README.md#updating) section in
 the README.
 
+## [1.1.0] - 2026-07-23
+
+Queued background sending — any list size on any plan.
+
+### Added
+
+- **Send queue (outbox)** — `POST /api/send` stores the campaign and returns
+  immediately; a minutely background job delivers `SEND_BATCH` emails per run
+  (default 40, sized for the free plan's subrequest limits). A 1,000-recipient
+  campaign completes in ~25 minutes on the free plan.
+- **Retries + crash safety** — up to 3 attempts per recipient; rows claimed by
+  a crashed run are reclaimed after 10 minutes; atomic claims mean overlapping
+  runs can never double-send.
+- **Opt-out cancellation** — unsubscribing also cancels that address's
+  queued-but-undelivered emails.
+- **Optional batch adapter** — export `sendEmailBatch()` from `src/email.ts`
+  (commented example in the file) to deliver up to ~1,000 emails per API call;
+  with it even the free plan finishes big lists in minutes.
+- `SEND_BATCH` variable on the deploy screen.
+
+### Changed
+
+- `POST /api/send` responds `{ ok, queued }` instead of `{ ok, sent, failed }`;
+  delivery progress lands in the `campaigns` table (`sent_count`/`fail_count`).
+- The Worker cron runs every minute now (queue drain); the RSS feed check
+  keeps its 15-minute cadence internally. RSS posts go through the same queue.
+- Migration `0003_outbox.sql` (append-only): `outbox` table plus
+  `campaigns.body_html` / `campaigns.base_url`.
+
 ## [1.0.0] - 2026-07-23
 
 First stable release. From here on, `sendEmail()` / `isEmailConfigured()`

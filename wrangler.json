@@ -12,11 +12,12 @@
     }
   ],
   "triggers": {
-    "crons": ["*/15 * * * *"]
+    "crons": ["* * * * *"]
   },
   "vars": {
     "FROM_NAME": "My Newsletter",
     "FROM_EMAIL": "newsletter@example.com",
-    "DOUBLE_OPT_IN": "false"
+    "DOUBLE_OPT_IN": "false",
+    "SEND_BATCH": "40"
   }
 }

@@ -55,10 +55,9 @@ Settings → Variables and Secrets* (double opt-in can also be set on the deploy
   `TURNSTILE_SITE_KEY` (variable) **and** `TURNSTILE_SECRET_KEY` (secret). The
   signup form then shows the widget and rejects unverified submissions. Leave
   both blank to disable.
-- **Postal address (`SENDER_ADDRESS`)** — e.g. `Acme Inc., 123 Main St,
-  Springfield, USA`. Appears in the footer of every email; the US CAN-SPAM Act
-  requires a valid physical address in commercial email. Set it before your
-  first campaign.
+- **Postal address (`SENDER_ADDRESS`)** — e.g. `Acme Inc., 123 Main St, Springfield, USA`.
+  Appears in the footer of every email; the US CAN-SPAM Act requires a valid
+  physical address in commercial email. Set it before your first campaign.
 - **Privacy policy (`PRIVACY_URL`)** — absolute URL of your privacy policy;
   when set, a link appears under the signup form (expected by EU privacy rules).
 
@@ -228,6 +227,30 @@ npm install
 cp .dev.vars.example .dev.vars   # fill in your values
 npm run dev                      # applies the schema to a local D1, then starts Wrangler
 ```
+
+## Updating
+
+Your deployment is a copy of this repo in your own GitHub account — updates
+here don't reach it automatically (nothing ever pushes into your account).
+To pull in the latest version:
+
+```bash
+git remote add template https://github.com/pfstr/newsletter-template
+git fetch template
+git merge template/main   # add --allow-unrelated-histories if git asks
+git push                  # your CI redeploys; new D1 migrations apply automatically
+```
+
+Your own changes are safe: customizations live in [`src/email.ts`](src/email.ts)
+and [`src/fields.ts`](src/fields.ts), whose interfaces are treated as stable
+API — breaking changes to them only happen in a new major version, with an
+upgrade guide. Database migrations are append-only and applied by the
+`predeploy` script, so schema upgrades happen on your next deploy by
+themselves.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for what's new, or [watch
+releases](https://github.com/pfstr/newsletter-template/releases) to get
+notified.
 
 ## Notes & limits
 

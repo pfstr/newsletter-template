@@ -237,18 +237,23 @@ To pull in the latest version:
 ```bash
 git remote add template https://github.com/pfstr/newsletter-template
 git fetch template
-git merge template/main   # add --allow-unrelated-histories if git asks
-git push                  # your CI redeploys; new D1 migrations apply automatically
+git merge -X theirs --allow-unrelated-histories --no-commit template/main
+git checkout HEAD -- src/email.ts src/fields.ts wrangler.json
+git commit -m "Update template" && git push
 ```
 
-Your own changes are safe: customizations live in [`src/email.ts`](src/email.ts)
-and [`src/fields.ts`](src/fields.ts), whose interfaces are treated as stable
-API — breaking changes to them only happen in a new major version, with an
-upgrade guide. Database migrations are append-only and applied by the
-`predeploy` script, so schema upgrades happen on your next deploy by
-themselves.
+`-X theirs` takes the upstream side of every change; the `git checkout` line
+then keeps your own email adapter, your extra fields, and your `wrangler.json`
+(your D1 `database_id` lives there). If you've customized other files too,
+drop `-X theirs` and resolve the conflicts by hand. Your CI redeploys on push,
+and database migrations are append-only + applied by the `predeploy` script —
+schema upgrades happen by themselves.
 
-See [`CHANGELOG.md`](CHANGELOG.md) for what's new, or [watch
+The interfaces you build on — `sendEmail()` / `isEmailConfigured()` in
+[`src/email.ts`](src/email.ts) and `EXTRA_FIELDS` in
+[`src/fields.ts`](src/fields.ts) — are stable API: breaking changes only in a
+new major version, with an upgrade guide. See [`CHANGELOG.md`](CHANGELOG.md)
+for what's new, or [watch
 releases](https://github.com/pfstr/newsletter-template/releases) to get
 notified.
 

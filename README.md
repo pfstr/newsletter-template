@@ -69,6 +69,10 @@ Settings → Variables and Secrets* (double opt-in can also be set on the deploy
   default to English. Set `FOOTER_TEXT` and `UNSUBSCRIBE_LABEL` for the footer,
   and `CONFIRM_SUBJECT` / `CONFIRM_HTML` (supports a `{{confirm_url}}` merge
   tag) for the confirmation email, to use your own language.
+- **New-subscriber notification (`NOTIFY_EMAIL`)** — set it to your own address
+  to receive a short email whenever a subscription becomes active (a single
+  opt-in signup, or a confirmed double opt-in). Requires email to be
+  configured. Leave blank to disable.
 
 ## How it works
 

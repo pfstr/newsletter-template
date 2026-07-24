@@ -1,6 +1,6 @@
 {
   "name": "newsletter-template",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Serverless newsletter on your own Cloudflare account — signup, compliant one-click unsubscribe, and campaigns to your own list. Bring your own email sender.",
   "private": true,
   "license": "MIT",
@@ -32,6 +32,9 @@
       },
       "DOUBLE_OPT_IN": {
         "description": "Set to \"true\" to require subscribers to confirm via a link before they're added (needs email configured). Default \"false\" (single opt-in)."
+      },
+      "NOTIFY_EMAIL": {
+        "description": "Your own address: get a short notification email whenever a subscription becomes active (needs email configured). Leave blank to disable."
       },
       "SEND_BATCH": {
         "description": "Queued emails delivered per minutely background run. The default 40 fits the free plan; raise it on the paid plan or when sendEmailBatch is implemented in src/email.ts."

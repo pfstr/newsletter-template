@@ -7,6 +7,15 @@ All notable changes to this template are documented here. The format follows
 Updating a deployed copy: see the [Updating](README.md#updating) section in
 the README.
 
+## [1.3.0] - 2026-07-24
+
+### Added
+
+- New-subscriber notification: set `NOTIFY_EMAIL` to your own address to get
+  a short email whenever a subscription becomes active — on a single opt-in
+  signup, or when a double opt-in is confirmed. Off unless the variable is
+  set; delivery is best-effort and never affects the subscriber-facing flow.
+
 ## [1.2.1] - 2026-07-23
 
 ### Fixed

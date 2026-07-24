@@ -24,6 +24,7 @@ type Bindings = {
   UNSUBSCRIBE_LABEL?: string;
   CONFIRM_SUBJECT?: string;
   CONFIRM_HTML?: string;
+  NOTIFY_EMAIL?: string;
 };
 
 // One outgoing email, ready for delivery.
@@ -290,6 +291,26 @@ app.get("/", (c) => c.html(signupPage(c.env.TURNSTILE_SITE_KEY, c.env.PRIVACY_UR
 // --- Public: bare form for iframe/script embedding on your own site ---
 app.get("/embed", (c) => c.html(embedPage(c.env.TURNSTILE_SITE_KEY, c.env.PRIVACY_URL)));
 
+// Owner notification: when NOTIFY_EMAIL is set, a short heads-up email goes
+// out for every subscription that becomes active (single opt-in signup, or a
+// confirmed double opt-in). Best-effort — a failure here must never affect
+// the subscriber-facing flow.
+async function notifyOwner(env: Bindings, email: string, name: string | null, via: string): Promise<void> {
+  const to = String(env.NOTIFY_EMAIL ?? "").trim();
+  if (!to || !isEmailConfigured(env)) return;
+  const lines = [`Email: ${email}`, name ? `Name: ${name}` : "", `Via: ${via}`].filter(Boolean);
+  try {
+    await sendEmail(env, {
+      to,
+      subject: `New subscriber: ${email}`,
+      html: emailDocument(`<p>${lines.map(escapeHtml).join("<br>")}</p>`),
+      headers: {},
+    });
+  } catch (err) {
+    console.error("owner notification failed:", err);
+  }
+}
+
 // Allow the subscribe endpoint to be called from your own website's domain.
 app.use("/api/subscribe", cors());
 
@@ -355,7 +376,12 @@ app.post("/api/subscribe", async (c) => {
     return c.json({ ok: true, pending: true });
   }
 
-  // Single opt-in: active immediately.
+  // Single opt-in: active immediately. The prior status decides whether this
+  // is a genuinely new subscription (worth notifying the owner about) or just
+  // a re-submit by someone already on the list.
+  const prior = await c.env.DB.prepare(
+    `SELECT status FROM subscribers WHERE email = ?1`,
+  ).bind(email).first<{ status: string }>();
   await c.env.DB.prepare(
     `INSERT INTO subscribers (email, name, status, unsub_token, data)
      VALUES (?1, ?2, 'subscribed', ?3, ?4)
@@ -364,6 +390,9 @@ app.post("/api/subscribe", async (c) => {
        name = COALESCE(excluded.name, subscribers.name),
        data = COALESCE(excluded.data, subscribers.data)`,
   ).bind(email, name || null, crypto.randomUUID(), dataJson).run();
+  if (prior?.status !== "subscribed") {
+    c.executionCtx.waitUntil(notifyOwner(c.env, email, name || null, "single opt-in signup"));
+  }
   return c.json({ ok: true });
 });
 
@@ -371,11 +400,15 @@ app.post("/api/subscribe", async (c) => {
 app.get("/confirm", async (c) => {
   const token = c.req.query("t") || c.req.query("token") || "";
   if (token) {
-    await c.env.DB.prepare(
+    const row = await c.env.DB.prepare(
       `UPDATE subscribers SET status = 'subscribed', confirm_token = NULL,
          confirmed_at = datetime('now')
-       WHERE confirm_token = ?1 AND status = 'pending'`,
-    ).bind(token).run();
+       WHERE confirm_token = ?1 AND status = 'pending'
+       RETURNING email, name`,
+    ).bind(token).first<{ email: string; name: string | null }>();
+    if (row) {
+      c.executionCtx.waitUntil(notifyOwner(c.env, row.email, row.name, "confirmed double opt-in"));
+    }
   }
   return c.html(messagePage("You're subscribed!", "Thanks for confirming — you're all set."));
 });
